@@ -1,7 +1,7 @@
-$CP = [System.CodeDom.Compiler.CompilerParameters]::New()
+$CP = New-Object System.CodeDom.Compiler.CompilerParameters
 $CP.ReferencedAssemblies.Add('System.dll')
-$CP.CompilerOptions = '/unsafe'
-$CP.OutputAssembly = test.exe
+$CP.CompilerOptions = '/unsafe /target:exe /platform:x86'
+$CP.OutputAssembly = 'test.exe'
 
 Add-Type -TypeDefinition @'
 using System;
@@ -11,8 +11,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace test{
-  public class test{
+public class Dummy
+{
     [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int AssemblyAddFunction(int x, int y);
@@ -20,8 +20,9 @@ namespace test{
     [DllImport("kernel32.dll")]
     private static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
     
-    public static void Main(){
-      byte[] assembledCode =
+    public static void Main()
+    {
+        byte[] assembledCode =
         {
             0x55,               // 0 push ebp            
             0x8B, 0x45, 0x08,   // 1 mov  eax, [ebp+8]   
@@ -31,7 +32,7 @@ namespace test{
             0xC3                // A ret                 
         };
 
-      uint _;
+        uint _;
 
         int returnValue;
         unsafe
@@ -46,13 +47,12 @@ namespace test{
                     throw new Win32Exception();
                 }
 
-                var myAssemblyFunction = Marshal.GetDelegateForFunctionPointer<AssemblyAddFunction>(memoryAddress);
+                AssemblyAddFunction myAssemblyFunction = (AssemblyAddFunction)Marshal.GetDelegateForFunctionPointer(memoryAddress, typeof(AssemblyAddFunction));
                 returnValue = myAssemblyFunction(10, -15);
             }               
         }
 
         Console.WriteLine(returnValue);
     }
-  }
 }
-'@
+'@ -CompilerParameters $CP
