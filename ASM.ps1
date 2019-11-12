@@ -20,7 +20,7 @@ public class Dummy
     [DllImport("kernel32.dll")]
     private static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
     
-    public static void Main()
+    public static void Main(string[] args)
     {
         byte[] assembledCode =
         {
