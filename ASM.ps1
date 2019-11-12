@@ -1,4 +1,4 @@
-$CP = [system.CodeDom.COmpiler.CompilerParameters]::new()
+$CP = [System.CodeDom.Compiler.CompilerParameters]::New()
 $CP.ReferencedAssemblies.Add('System.dll')
 $CP.CompilerOptions = '/unsafe'
 $CP.OutputAssembly = test.exe
