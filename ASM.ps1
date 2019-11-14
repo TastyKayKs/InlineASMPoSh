@@ -5,7 +5,6 @@ $CP.OutputAssembly = 'test.exe'
 
 Add-Type -TypeDefinition @'
 using System;
-using System.IO;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
