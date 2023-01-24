@@ -1,7 +1,7 @@
 $CP = New-Object System.CodeDom.Compiler.CompilerParameters
 $CP.ReferencedAssemblies.Add('System.dll')
-$CP.CompilerOptions = '/unsafe /target:exe /platform:x86'
-$CP.OutputAssembly = 'test.exe'
+$CP.CompilerOptions = '/unsafe /target:library /platform:x86'
+$CP.OutputAssembly = 'test.dll'
 
 Add-Type -TypeDefinition @'
 using System;
@@ -19,16 +19,18 @@ public class Dummy
     [DllImport("kernel32.dll")]
     private static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
     
-    public static void Main(string[] args)
+    public static void Add(int x, int y)
     {
         byte[] assembledCode =
         {
             0x55,               // 0 push ebp            
+            0x8B, 0xEC,         // 1 mov  ebp, esp
             0x8B, 0x45, 0x08,   // 1 mov  eax, [ebp+8]   
             0x8B, 0x55, 0x0C,   // 4 mov  edx, [ebp+12]  
             0x01, 0xD0,         // 7 add  eax, edx       
             0x5D,               // 9 pop  ebp            
             0xC3                // A ret                 
+
         };
 
         uint _;
@@ -47,7 +49,7 @@ public class Dummy
                 }
 
                 AssemblyAddFunction myAssemblyFunction = (AssemblyAddFunction)Marshal.GetDelegateForFunctionPointer(memoryAddress, typeof(AssemblyAddFunction));
-                returnValue = myAssemblyFunction(10, -15);
+                returnValue = myAssemblyFunction(x, y);
             }               
         }
 
@@ -55,3 +57,4 @@ public class Dummy
     }
 }
 '@ -CompilerParameters $CP
+[Dummy]::Add(10,40)
